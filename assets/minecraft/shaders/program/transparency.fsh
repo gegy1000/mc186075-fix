@@ -45,10 +45,6 @@ varying vec2 texCoord;
 vec4 color_samples[NUM_LAYERS];
 float depth_samples[NUM_LAYERS];
 
-vec3 blend(vec3 tex, vec4 sample) {
-    return mix(tex, sample.rgb, sample.a);
-}
-
 void main() {
     // There will always be at least one sample (from the diffuse layer)
     int sample_count = 1;
@@ -68,9 +64,13 @@ void main() {
     try_insert_sample(CloudsSampler, CloudsDepthSampler);
     
     // Blend and merge the framebuffer samples
+
+    // We can disregard the first sample's alpha value: if it is translucent, 
+    // we know it will be overridden by an opaque pixel from the diffuse layer
     vec3 tex = color_samples[0].rgb;
     for (int i = 1; i < sample_count; i++) {
-        tex = blend(tex, color_samples[i]);
+        vec4 sample = color_samples[i];
+        tex = mix(tex, sample.rgb, sample.a);
     }
     
     // Write the blended colors to the final framebuffer output
