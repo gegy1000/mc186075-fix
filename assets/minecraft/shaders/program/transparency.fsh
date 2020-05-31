@@ -45,9 +45,8 @@ varying vec2 texCoord;
 vec4 color_samples[NUM_LAYERS];
 float depth_samples[NUM_LAYERS];
 
-vec4 blend(vec4 tex, vec4 sample) {
-    float factor = 1.0 - sample.a;
-    return (tex * factor) + sample;
+vec3 blend(vec3 tex, vec4 sample) {
+    return mix(tex, sample.rgb, sample.a);
 }
 
 void main() {
@@ -56,7 +55,7 @@ void main() {
     
     // Always sample the diffuse layer to provide a base color for blending
     color_samples[0] = texture2D(DiffuseSampler, texCoord);
-    color_samples[0].w = 1.0; // Discard the alpha channel to fix issues with cutout textures
+    color_samples[0].a = 1.0; // Discard the alpha channel to fix issues with cutout textures
     depth_samples[0] = texture2D(DiffuseDepthSampler, texCoord).r;
     
     // Try to insert a sample from each layer
@@ -69,12 +68,11 @@ void main() {
     try_insert_sample(CloudsSampler, CloudsDepthSampler);
     
     // Blend and merge the framebuffer samples
-    vec4 tex = vec4(0.0);
-    
-    for (int i = 0; i < sample_count; i++) {
+    vec3 tex = color_samples[0].rgb;
+    for (int i = 1; i < sample_count; i++) {
         tex = blend(tex, color_samples[i]);
     }
     
     // Write the blended colors to the final framebuffer output
-    gl_FragColor = vec4(tex.rgb, 1.0);
+    gl_FragColor = vec4(tex, 1.0);
 }
