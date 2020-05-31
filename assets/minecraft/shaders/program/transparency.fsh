@@ -25,7 +25,8 @@ varying vec2 texCoord;
         depth_samples[i] = texture2D(depth_sampler, texCoord).r; \
         \
         /* Perform an insertion sort at the given index in the array, sorted by descending depth */ \
-        while (depth_samples[i] > depth_samples[i - 1]) { \
+        /* Although the i>0 check will always be false on the first iteration, keeping it here seems to elide a branch */ \
+        while (i > 0 && depth_samples[i] > depth_samples[i - 1]) { \
             vec4 color = color_samples[i]; \
             color_samples[i] = color_samples[i - 1]; \
             color_samples[i - 1] = color; \
@@ -34,8 +35,7 @@ varying vec2 texCoord;
             depth_samples[i] = depth_samples[i - 1]; \
             depth_samples[i - 1] = depth; \
             \
-            /* Postpone the bounds check as it will never be true on the first iteration */ \
-            if (--i <= 0) break; \
+            i--; \
         } \
     } \
 }
