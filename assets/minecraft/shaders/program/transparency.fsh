@@ -45,6 +45,11 @@ varying vec2 texCoord;
 vec4 color_samples[NUM_LAYERS];
 float depth_samples[NUM_LAYERS];
 
+vec3 blend(vec3 tex, vec4 sample) {
+    float factor = 1.0 - sample.a;
+    return (tex * factor) + sample.rgb;
+}
+
 void main() {
     // There will always be at least one sample (from the diffuse layer)
     int sample_count = 1;
@@ -69,8 +74,7 @@ void main() {
     // we know it will be overridden by an opaque pixel from the diffuse layer
     vec3 tex = color_samples[0].rgb;
     for (int i = 1; i < sample_count; i++) {
-        vec4 sample = color_samples[i];
-        tex = mix(tex, sample.rgb, sample.a);
+        tex = blend(tex, color_samples[i]);
     }
     
     // Write the blended colors to the final framebuffer output
