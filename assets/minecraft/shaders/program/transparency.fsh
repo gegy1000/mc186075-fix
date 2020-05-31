@@ -45,6 +45,7 @@ varying vec2 texCoord;
 vec4 color_samples[NUM_LAYERS];
 float depth_samples[NUM_LAYERS];
 
+// This blending works with color components that have already been premultiplied by their alpha component
 vec3 blend(vec3 tex, vec4 sample) {
     float factor = 1.0 - sample.a;
     return (tex * factor) + sample.rgb;
