@@ -71,8 +71,7 @@ void main() {
     
     // Blend and merge the framebuffer samples
 
-    // We can disregard the first sample's alpha value: if it is translucent, 
-    // we know it will be overridden by an opaque pixel from the diffuse layer
+    // We don't need to consider the first layer's alpha value because the color components are already premultiplied
     vec3 tex = color_samples[0].rgb;
     for (int i = 1; i < sample_count; i++) {
         tex = blend(tex, color_samples[i]);
